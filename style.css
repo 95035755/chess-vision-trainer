@@ -1,0 +1,8 @@
+body {
+    background-color: rgb(41, 44, 47);
+}
+
+#board {
+    height: 500px;
+    border: 1px solid black;
+}
