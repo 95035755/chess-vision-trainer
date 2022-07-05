@@ -2,18 +2,27 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Chess vision trainer</title>
     <link rel="icon" type="image/x-icon" href="assets/W_N.png">
     <link rel="stylesheet" href="style.css">
+    <script src="script.js" defer></script>
 </head>
 
 <body>
-<h1>Welcome to Chess Vision Trainer!</h1>
 
-<div id="board">
-
+<div style="position:absolute; z-index:-1">
+    <img id="board" src="assets/chess-board.png" alt="Chess board">
+    <!--<img id="piece" src="assets/W_K.png" alt="White King">-->
 </div>
-
+<div id="piece">
+    <img src="assets/W_K.png" alt="Chess piece">
+    <img src="assets/W_Q.png" alt="Chess piece">
+    <img src="assets/W_R.png" alt="Chess piece">
+    <img src="assets/W_B.png" alt="Chess piece">
+    <img src="assets/W_N.png" alt="Chess piece">
+    <img src="assets/W_P.png" alt="Chess piece">
+</div>
 </body>
-<script src="script.js"></script>
+
 </html>

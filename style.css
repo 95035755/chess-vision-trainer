@@ -1,8 +1,27 @@
+* {
+    font-family: sans-serif;
+    font-weight: normal;
+}
+
+
 body {
     background-color: rgb(41, 44, 47);
 }
 
-#board {
-    height: 500px;
-    border: 1px solid black;
+h1, p {
+    color: whitesmoke;
 }
+
+div {
+    margin: 5px;
+}
+
+#board {
+    display: block;
+    margin: 0px auto;
+    height: 97vh;
+}
+/*
+#piece {
+
+}*/
