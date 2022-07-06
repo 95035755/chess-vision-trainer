@@ -1,20 +1,28 @@
 const numCol = 8;
+const cellSizeVh = parseInt(getComputedStyle(document.body).getPropertyValue("--board-size")) / 8;
+const viewportHeight = Math.max(document.documentElement.clientHeight, window.innerHeight || 0);
+const cellSize = cellSizeVh * viewportHeight / 100;
 
 class Piece {
     constructor(type, square) {
         this.type = type;
-        this.square = square;
+        this.squareId = this.getSquareId(square);
+        this.node = this.getPieceNode();
+        this.display();
+        this.element = document.getElementById(this.type);
+        this.eventListener();
     }
 
-    getSquareId() {
-        let squareId = (this.square[1] - 1) * numCol + (this.square[0] - 1);
+    getSquareId(square) {
+        let squareId = (square[1] - 1) * numCol + (square[0] - 1);
         return squareId;
     }
 
     getPieceNode() {
         let imgPath = "assets/" + this.type + ".png";
         let node = document.createElement("img");
-        node.setAttribute("id", "piece");
+        node.setAttribute("id", this.type);
+        node.setAttribute("class", "piece");
         node.setAttribute("draggable", "false");
         node.setAttribute("src", imgPath);
         node.setAttribute("alt", "Chess piece");
@@ -23,14 +31,39 @@ class Piece {
     }
 
     display() {
-        let squareId = this.getSquareId();
         let allSquares = document.getElementById("board").children;
-        let squareElement = allSquares[squareId];
-        console.log(allSquares);
+        let squareElement = allSquares[this.squareId];  // parent div of img
         squareElement.setAttribute("id", "testAt");
-        let pieceNode = this.getPieceNode();
-        squareElement.appendChild(pieceNode);
+        squareElement.appendChild(this.node);
     }
+
+    eventListener() {
+        let followMouse = true;
+
+        this.element.addEventListener("mousedown", e => {
+            followMouse = true
+            this.element.style.cursor = "grabbing";
+            let x = parseInt(e.clientX) - cellSize / 2;
+            let y = parseInt(e.clientY) - cellSize / 2;
+            this.element.style.left = x.toString() + "px";
+            this.element.style.top = y.toString() + "px";
+            
+            document.addEventListener("mousemove", e => {
+                if (followMouse == true) {
+                    let x = parseInt(e.clientX) - cellSize / 2;
+                    let y = parseInt(e.clientY) - cellSize / 2;
+                    this.element.style.left = x.toString() + "px";
+                    this.element.style.top = y.toString() + "px";
+                }
+            });
+        });
+
+        document.addEventListener("mouseup", e => {
+            this.element.style.cursor = "pointer";
+            followMouse = false
+        });
+    }
+
 }
 
 function randomSquare() {
@@ -39,4 +72,3 @@ function randomSquare() {
 }
 
 firstPiece = new Piece("white_rook", randomSquare());
-firstPiece.display();

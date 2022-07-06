@@ -7,7 +7,7 @@
 :root {
     --board-size: 96vh;
     --cell-size: calc(var(--board-size) / 8);
-    --mark-size: calc(var(--cell-size) * .9);
+    --mark-size: calc(var(--cell-size) * .9); /* what is this for? */
 }
 
 body {
@@ -50,10 +50,12 @@ h1, p {
     align-items: center;
 }
 
-#piece {
+.piece {
     -webkit-user-drag: none;
     user-select: none;
     -moz-user-select: none;
     -webkit-user-select: none;
     -ms-user-select: none;
+    cursor: pointer;
+    position: absolute;
 }
