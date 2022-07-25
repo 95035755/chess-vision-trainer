@@ -3,12 +3,18 @@ const cellSizeVh = parseInt(getComputedStyle(document.body).getPropertyValue("--
 const viewportHeight = Math.max(document.documentElement.clientHeight, window.innerHeight || 0);
 const cellSize = cellSizeVh * viewportHeight / 100;
 
+// based on css margins of .game
+const marginX = vw(50) - cellSize*numCol/2;
+const marginY = vh(2);
+
+
 class Piece {
     constructor(type, square) {
         this.type = type;
+        this.squareArray = square;
         this.squareId = this.getSquareId(square);
         this.node = this.getPieceNode();
-        this.display();
+        this.displayPiece();
         this.element = document.getElementById(this.type);
         this.eventListener();
     }
@@ -30,16 +36,24 @@ class Piece {
         return node;
     }
 
-    display() {
-        let allSquares = document.getElementById("board").children;
-        let squareElement = allSquares[this.squareId];  // parent div of img
-        squareElement.setAttribute("id", "testAt");
+    getSquareDiv(square) {
+        let allSquares = document.getElementById("html-board").children;
+        let squareElement = allSquares[square];
+        return squareElement;
+    }
+
+    // displays piece img on the html board
+    displayPiece() {
+        let squareElement = this.getSquareDiv(this.squareId);  // parent div of img
         squareElement.appendChild(this.node);
     }
 
     eventListener() {
         let followMouse = true;
+        let highlighted = false;
+        let legalSquares = this.getLegalSquares();
 
+        // click on piece
         this.element.addEventListener("mousedown", e => {
             followMouse = true
             this.element.style.cursor = "grabbing";
@@ -47,21 +61,150 @@ class Piece {
             let y = parseInt(e.clientY) - cellSize / 2;
             this.element.style.left = x.toString() + "px";
             this.element.style.top = y.toString() + "px";
+
+            if (highlighted == false) {
+                this.highlightLegalSquares(legalSquares);
+                highlighted = true;
+            }
             
+            let currentlyHighlightedDivs = [];
+            
+            // piece follow mouse
             document.addEventListener("mousemove", e => {
                 if (followMouse == true) {
+
+                    // ** 1. Piece follow mouse **
                     let x = parseInt(e.clientX) - cellSize / 2;
                     let y = parseInt(e.clientY) - cellSize / 2;
                     this.element.style.left = x.toString() + "px";
                     this.element.style.top = y.toString() + "px";
+                    
+                    // ** 2. highlight hovered square **
+                    // 2.1 find hovered square
+                    let hoveredSquare = [Math.ceil((e.clientX - marginX) / cellSize), Math.ceil((e.clientY - marginY) / cellSize)];
+
+                    // TODO: don't highlight a piece's home square
+                    let hoveredSquareId = this.getSquareId(hoveredSquare);
+                    let hoveredSquareDiv = this.getSquareDiv(hoveredSquareId);
+
+                    if (currentlyHighlightedDivs.length > 0){
+                        currentlyHighlightedDivs[0].style.background = "transparent";
+                        currentlyHighlightedDivs.shift();
+                    }
+
+                    hoveredSquareDiv.style.background = "lightyellow";
+                    currentlyHighlightedDivs.push(hoveredSquareDiv);
                 }
             });
         });
 
         document.addEventListener("mouseup", e => {
             this.element.style.cursor = "pointer";
-            followMouse = false
+            if (followMouse) {
+                followMouse = false;
+                this.putDownPiece(e.clientX, e.clientY, legalSquares);
+            }
         });
+    }
+
+    // called on "mousedown" in this.eventListener();
+    highlightLegalSquares(legalSquares) {
+
+        // highlight which square the piece came from
+        let squareElement = this.getSquareDiv(this.squareId);
+        squareElement.style.border = "5px solid teal";
+
+
+        // create circles to highlight legal squares
+        for (let i of legalSquares) {
+            var squareDiv = this.getSquareDiv(i);
+            
+            let svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+            svg.setAttribute("class", this.type + "-legalcircle");
+            svg.setAttribute("width", cellSize);
+            svg.setAttribute("height", cellSize);
+            
+            let circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+            circle.setAttribute("cx", cellSize/2);
+            circle.setAttribute("cy", cellSize/2);
+            circle.setAttribute("r", 20);
+            circle.setAttribute("fill", "olive");
+            circle.setAttribute("opacity", "0.3");
+            
+            svg.appendChild(circle);
+            squareDiv.appendChild(svg);
+
+        }
+    }
+
+    // returns Id format
+    getLegalSquares() {
+        // ** only works for rook **
+
+        let allLegalSquares = [];
+
+        // rook can move along the row
+        for (let i = 1; i <= numCol; i++) {
+            let legalSquare = []
+            if (i != this.squareArray[0]) {
+                legalSquare[0] = i;
+                legalSquare[1] = this.squareArray[1];
+                allLegalSquares.push(legalSquare);
+            }
+        }
+
+        // rook can move along the column
+        for (let i = 1; i <= numCol; i++) {
+            let legalSquare = []
+            if (i != this.squareArray[0]) {
+                legalSquare[0] = this.squareArray[0];
+                legalSquare[1] = i;
+                allLegalSquares.push(legalSquare);
+            }
+        }
+        
+
+        // convert squareArray to squareId
+        let legalSquaresId = [];
+
+        for (let i = 0; i < allLegalSquares.length; i++) {
+
+            legalSquaresId[i] = this.getSquareId(allLegalSquares[i]);
+        }
+
+        return legalSquaresId;
+        
+    }
+
+    // places the piece image on the square the mouse hovers if legal.
+    putDownPiece(mouseX, mouseY, legalSquares) {
+        
+        let boardBound = document.getElementById("html-board").getBoundingClientRect();
+        let boardOffsetX = boardBound.left;
+        let boardOffsetY = boardBound.top;
+        mouseX -= boardOffsetX;
+        mouseY -= boardOffsetY;
+
+        mouseX = Math.ceil(mouseX / cellSize);
+        mouseY = Math.ceil(mouseY / cellSize);
+        let mouseSquare = [mouseX, mouseY];
+        let mouseSquareId = this.getSquareId(mouseSquare);
+        // remove current img
+        this.removePiece()
+        
+        // update object properties
+        if (legalSquares.includes(mouseSquareId)) {
+            this.squareArray = mouseSquare;
+            this.squareId = mouseSquareId;
+        }
+
+        // formally add image to the html-board's cell
+        this.displayPiece();
+    }
+
+    removePiece() {
+        let squareElement = this.getSquareDiv(this.squareId);  // parent div of img
+        squareElement.removeChild(this.node);
     }
 
 }
@@ -71,4 +214,16 @@ function randomSquare() {
             Math.floor(Math.random() * (numCol)) + 1];
 }
 
-firstPiece = new Piece("white_rook", randomSquare());
+//firstPiece = new Piece("white_rook", randomSquare());
+firstPiece = new Piece("white_rook", [1, 1]);
+
+// Utils functions
+function vh(v) {
+    var h = Math.max(document.documentElement.clientHeight, window.innerHeight || 0);
+    return (v * h) / 100;
+  }
+  
+function vw(v) {
+    var w = Math.max(document.documentElement.clientWidth, window.innerWidth || 0);
+    return (v * w) / 100;
+}

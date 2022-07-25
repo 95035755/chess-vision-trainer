@@ -21,7 +21,7 @@ h1, p {
 }
 
 .game {
-    margin: 2vh calc(50vw - calc( var(--board-size)/2 ));
+    margin: 2vh calc(50vw - calc( var(--board-size) / 2));
 }
 
 #board-img {
@@ -32,7 +32,7 @@ h1, p {
     z-index: -1;
 }
 
-.board {
+.html-board {
     display: grid;
     justify-content: start;
     align-content: center;
