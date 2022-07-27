@@ -42,10 +42,21 @@ class Piece {
         return squareElement;
     }
 
+    getPiecePosition() {
+        let pos = [];
+        pos[0] = (this.squareArray[0] - 1) * cellSize;
+        pos[1] = (this.squareArray[1] - 1) * cellSize;
+        return pos;
+    }
+
     // displays piece img on the html board
     displayPiece() {
-        let squareElement = this.getSquareDiv(this.squareId);  // parent div of img
-        squareElement.appendChild(this.node);
+        let piecesDiv = document.getElementById("pieces");
+        piecesDiv.appendChild(this.node);
+        let piece = document.getElementById(this.type);
+        let pos = this.getPiecePosition();
+        piece.style.left = pos[0].toString() + "px";
+        piece.style.top = pos[1].toString() + "px";
     }
 
     eventListener() {
@@ -57,8 +68,8 @@ class Piece {
         this.element.addEventListener("mousedown", e => {
             followMouse = true
             this.element.style.cursor = "grabbing";
-            let x = parseInt(e.clientX) - cellSize / 2;
-            let y = parseInt(e.clientY) - cellSize / 2;
+            let x = parseInt(e.clientX) - cellSize / 1.5;
+            let y = parseInt(e.clientY) - cellSize / 1.5;
             this.element.style.left = x.toString() + "px";
             this.element.style.top = y.toString() + "px";
 
@@ -74,17 +85,15 @@ class Piece {
                 if (followMouse == true) {
 
                     // ** 1. Piece follow mouse **
-                    let x = parseInt(e.clientX) - cellSize / 2;
-                    let y = parseInt(e.clientY) - cellSize / 2;
+                    let x = parseInt(e.clientX) - cellSize / 1.5;
+                    let y = parseInt(e.clientY) - cellSize / 1.5;
                     this.element.style.left = x.toString() + "px";
                     this.element.style.top = y.toString() + "px";
                     
                     // ** 2. highlight hovered square **
                     // 2.1 find hovered square
-                    let hoveredSquare = [Math.ceil((e.clientX - marginX) / cellSize), Math.ceil((e.clientY - marginY) / cellSize)];
-
                     // TODO: don't highlight a piece's home square
-                    let hoveredSquareId = this.getSquareId(hoveredSquare);
+                    let hoveredSquareId = this.getHoveredSquareId(e.clientX, e.clientY);
                     let hoveredSquareDiv = this.getSquareDiv(hoveredSquareId);
 
                     if (currentlyHighlightedDivs.length > 0){
@@ -137,7 +146,14 @@ class Piece {
         }
     }
 
-    // returns Id format
+    // find the square the mouse is on
+    getHoveredSquareId(clientX, clientY) {
+        let square = [Math.ceil((clientX - marginX) / cellSize), Math.ceil((clientY - marginY) / cellSize)];
+        let squareId = this.getSquareId(square);
+        return squareId;
+    }
+
+    // returns in Id format
     getLegalSquares() {
         // ** only works for rook **
 
@@ -156,7 +172,7 @@ class Piece {
         // rook can move along the column
         for (let i = 1; i <= numCol; i++) {
             let legalSquare = []
-            if (i != this.squareArray[0]) {
+            if (i != this.squareArray[1]) {
                 legalSquare[0] = this.squareArray[0];
                 legalSquare[1] = i;
                 allLegalSquares.push(legalSquare);
@@ -178,19 +194,15 @@ class Piece {
 
     // places the piece image on the square the mouse hovers if legal.
     putDownPiece(mouseX, mouseY, legalSquares) {
-        
         let boardBound = document.getElementById("html-board").getBoundingClientRect();
-        let boardOffsetX = boardBound.left;
-        let boardOffsetY = boardBound.top;
-        mouseX -= boardOffsetX;
-        mouseY -= boardOffsetY;
 
         mouseX = Math.ceil(mouseX / cellSize);
         mouseY = Math.ceil(mouseY / cellSize);
         let mouseSquare = [mouseX, mouseY];
         let mouseSquareId = this.getSquareId(mouseSquare);
-        // remove current img
-        this.removePiece()
+
+        // unhighlight squares
+        // ........
         
         // update object properties
         if (legalSquares.includes(mouseSquareId)) {
@@ -200,11 +212,8 @@ class Piece {
 
         // formally add image to the html-board's cell
         this.displayPiece();
-    }
 
-    removePiece() {
-        let squareElement = this.getSquareDiv(this.squareId);  // parent div of img
-        squareElement.removeChild(this.node);
+        // update constructor values
     }
 
 }
@@ -215,7 +224,7 @@ function randomSquare() {
 }
 
 //firstPiece = new Piece("white_rook", randomSquare());
-firstPiece = new Piece("white_rook", [1, 1]);
+firstPiece = new Piece("white_rook", [4, 5]);
 
 // Utils functions
 function vh(v) {

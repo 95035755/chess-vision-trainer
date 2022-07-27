@@ -32,6 +32,13 @@ h1, p {
     z-index: -1;
 }
 
+#pieces {
+    position: absolute;
+    width: var(--board-size);
+    height: var(--board-size);
+
+}
+
 .html-board {
     display: grid;
     justify-content: start;
