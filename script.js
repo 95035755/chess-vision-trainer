@@ -6,7 +6,7 @@ const cellSize = cellSizeVh * viewportHeight / 100;
 // based on css margins of .game
 const marginX = vw(50) - cellSize*numCol/2;
 const marginY = vh(2);
-
+var hovered_square_div;
 
 class Piece {
     constructor(type, square) {
@@ -51,8 +51,8 @@ class Piece {
 
     // displays piece img on the html board
     displayPiece() {
-        let piecesDiv = document.getElementById("pieces");
-        piecesDiv.appendChild(this.node);
+         let piecesDiv = document.getElementById("pieces");
+         piecesDiv.appendChild(this.node);
         let piece = document.getElementById(this.type);
         let pos = this.getPiecePosition();
         piece.style.left = pos[0].toString() + "px";
@@ -91,10 +91,9 @@ class Piece {
                     this.element.style.top = y.toString() + "px";
                     
                     // ** 2. highlight hovered square **
-                    // 2.1 find hovered square
-                    // TODO: don't highlight a piece's home square
                     let hoveredSquareId = this.getHoveredSquareId(e.clientX, e.clientY);
                     let hoveredSquareDiv = this.getSquareDiv(hoveredSquareId);
+                    hovered_square_div = hoveredSquareDiv;  // future reference for unhighlighting
 
                     if (currentlyHighlightedDivs.length > 0){
                         currentlyHighlightedDivs[0].style.background = "transparent";
@@ -202,20 +201,29 @@ class Piece {
         let mouseSquareId = this.getSquareId(mouseSquare);
 
         // unhighlight squares
-        // ........
-        
+        let allSvgs = document.getElementsByClassName(this.type + "-legalcircle");
+        let length = allSvgs.length;
+        for (let i = 0; i < length; i++) {
+            allSvgs[0].parentElement.removeChild(allSvgs[0]);
+        }
+
+        // unhighlight home square
+        let squareElement = this.getSquareDiv(this.squareId);
+        squareElement.style.border = "";
+
+        // unhighlight hovered square
+        hovered_square_div.style.background = "";
+
+
         // update object properties
         if (legalSquares.includes(mouseSquareId)) {
             this.squareArray = mouseSquare;
             this.squareId = mouseSquareId;
         }
 
-        // formally add image to the html-board's cell
         this.displayPiece();
 
-        // update constructor values
     }
-
 }
 
 function randomSquare() {
@@ -224,7 +232,7 @@ function randomSquare() {
 }
 
 //firstPiece = new Piece("white_rook", randomSquare());
-firstPiece = new Piece("white_rook", [4, 5]);
+firstPiece = new Piece("white_rook", [1, 1]);
 
 // Utils functions
 function vh(v) {
