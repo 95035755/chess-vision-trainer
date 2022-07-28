@@ -2,6 +2,7 @@ const numCol = 8;
 const cellSizeVh = parseInt(getComputedStyle(document.body).getPropertyValue("--board-size")) / 8;
 const viewportHeight = Math.max(document.documentElement.clientHeight, window.innerHeight || 0);
 const cellSize = cellSizeVh * viewportHeight / 100;
+var highlighted = false;
 
 // based on css margins of .game
 const marginX = vw(50) - cellSize*numCol/2;
@@ -61,7 +62,6 @@ class Piece {
 
     eventListener() {
         let followMouse = true;
-        let highlighted = false;
         let legalSquares = this.getLegalSquares();
 
         // click on piece
@@ -74,7 +74,7 @@ class Piece {
             this.element.style.top = y.toString() + "px";
 
             if (highlighted == false) {
-                this.highlightLegalSquares(legalSquares);
+                this.highlightLegalSquares();
                 highlighted = true;
             }
             
@@ -110,13 +110,14 @@ class Piece {
             this.element.style.cursor = "pointer";
             if (followMouse) {
                 followMouse = false;
-                this.putDownPiece(e.clientX, e.clientY, legalSquares);
+                this.putDownPiece(e.clientX, e.clientY);
             }
         });
     }
 
     // called on "mousedown" in this.eventListener();
-    highlightLegalSquares(legalSquares) {
+    highlightLegalSquares() {
+        let legalSquares = this.getLegalSquares();
 
         // highlight which square the piece came from
         let squareElement = this.getSquareDiv(this.squareId);
@@ -192,7 +193,8 @@ class Piece {
     }
 
     // places the piece image on the square the mouse hovers if legal.
-    putDownPiece(mouseX, mouseY, legalSquares) {
+    putDownPiece(mouseX, mouseY) {
+        let legalSquares = this.getLegalSquares();
         let boardBound = document.getElementById("html-board").getBoundingClientRect();
 
         mouseX = Math.ceil(mouseX / cellSize);
@@ -214,6 +216,7 @@ class Piece {
         // unhighlight hovered square
         hovered_square_div.style.background = "";
 
+        highlighted = false;
 
         // update object properties
         if (legalSquares.includes(mouseSquareId)) {
