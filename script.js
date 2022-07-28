@@ -92,16 +92,19 @@ class Piece {
                     
                     // ** 2. highlight hovered square **
                     let hoveredSquareId = this.getHoveredSquareId(e.clientX, e.clientY);
-                    let hoveredSquareDiv = this.getSquareDiv(hoveredSquareId);
-                    hovered_square_div = hoveredSquareDiv;  // future reference for unhighlighting
+                    
+                    if (hoveredSquareId != undefined) {  // undefined when mouse is not over board
+                        let hoveredSquareDiv = this.getSquareDiv(hoveredSquareId);
+                        hovered_square_div = hoveredSquareDiv;  // future reference for unhighlighting
 
-                    if (currentlyHighlightedDivs.length > 0){
-                        currentlyHighlightedDivs[0].style.background = "transparent";
-                        currentlyHighlightedDivs.shift();
+                        if (currentlyHighlightedDivs.length > 0){
+                            currentlyHighlightedDivs[0].style.background = "transparent";
+                            currentlyHighlightedDivs.shift();
+                        }
+
+                        hoveredSquareDiv.style.background = "lightyellow";
+                        currentlyHighlightedDivs.push(hoveredSquareDiv);
                     }
-
-                    hoveredSquareDiv.style.background = "lightyellow";
-                    currentlyHighlightedDivs.push(hoveredSquareDiv);
                 }
             });
         });
@@ -149,6 +152,12 @@ class Piece {
     // find the square the mouse is on
     getHoveredSquareId(clientX, clientY) {
         let square = [Math.ceil((clientX - marginX) / cellSize), Math.ceil((clientY - marginY) / cellSize)];
+
+        // make sure you're hovering within the board area
+        if (square[0] > 8 || square[1] > 8 || square[0] < 1 || square[1] < 1) {
+            console.log("returned")
+            return undefined;
+        }
         let squareId = this.getSquareId(square);
         return squareId;
     }
@@ -218,8 +227,8 @@ class Piece {
 
         highlighted = false;
 
-        // update object properties
-        if (legalSquares.includes(mouseSquareId)) {
+        // update object properties, make sure mouseSquare is within 8x8 board and its legal
+        if (legalSquares.includes(mouseSquareId) && mouseSquare[0] < 9 && mouseSquare[1] < 9) {
             this.squareArray = mouseSquare;
             this.squareId = mouseSquareId;
         }
@@ -235,7 +244,7 @@ function randomSquare() {
 }
 
 //firstPiece = new Piece("white_rook", randomSquare());
-firstPiece = new Piece("white_rook", [1, 1]);
+firstPiece = new Piece("white_rook", [3, 3]);
 
 // Utils functions
 function vh(v) {
