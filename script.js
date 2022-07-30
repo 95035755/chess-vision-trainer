@@ -3,6 +3,7 @@ const cellSizeVh = parseInt(getComputedStyle(document.body).getPropertyValue("--
 const viewportHeight = Math.max(document.documentElement.clientHeight, window.innerHeight || 0);
 const cellSize = cellSizeVh * viewportHeight / 100;
 var highlighted = false;
+const assets = "neo-assets/";
 
 // based on css margins of .game
 const marginX = vw(50) - cellSize*numCol/2;
@@ -26,7 +27,7 @@ class Piece {
     }
 
     getPieceNode() {
-        let imgPath = "assets/" + this.type + ".png";
+        let imgPath = assets + this.type + ".png";
         let node = document.createElement("img");
         node.setAttribute("id", this.type);
         node.setAttribute("class", "piece");
@@ -244,7 +245,10 @@ function randomSquare() {
 }
 
 //firstPiece = new Piece("white_rook", randomSquare());
-firstPiece = new Piece("white_rook", [3, 3]);
+wr = new Piece("wr", [1, 8]);
+
+
+
 
 // Utils functions
 function vh(v) {
